@@ -1,78 +1,76 @@
-const fs = require('fs').promises;
-
 class Api {
-	constructor() {
-		this.productos = [
-			{
-				title: 'Escuadra',
-				price: 123.45,
-				thumbnail:
-					'https://cdn3.iconfinder.com/data/icons/education-209/64/ruler-triangle-stationary-school-256.png',
-				id: 1,
-			},
-			{
-				title: 'Calculadora',
-				price: 234.56,
-				thumbnail:
-					'https://cdn3.iconfinder.com/data/icons/education-209/64/calculator-math-tool-school-256.png',
-				id: 2,
-			},
-			{
-				title: 'Globo Terráqueo',
-				price: 345.67,
-				thumbnail:
-					'https://cdn3.iconfinder.com/data/icons/education-209/64/globe-earth-geograhy-planet-school-256.png',
-				id: 3,
-			},
-		];
+	constructor(productos) {
+		this.productos = productos;
 	}
 
 	async save(obj) {
 		try {
-			let ids = [];
-			this.productos.forEach((element) => {
-				ids.push(element.id);
-			});
-			obj.id = Math.max(...ids) + 1;
-			this.productos.push(obj);
-			return Math.max(...ids) + 1;
+			if (obj.title && obj.price && obj.thumbnail) {
+				let ids = [];
+				this.productos.forEach((element) => {
+					ids.push(element.id);
+				});
+				obj.id = Math.max(...ids) + 1;
+				this.productos.push(obj);
+			} else {
+				throw new Error(
+					'es necesario poner todos los parametros correspondientes'
+				);
+			}
 		} catch (error) {
-			console.log('hubo un error:', error);
+			throw { error: `${error.message}` };
 		}
 	}
 
 	async getById(number) {
 		try {
-			const datos = this.productos;
-			let elementById = datos.find((element) => element.id === number);
+			let elementById = this.productos.find((element) => element.id == number);
 			if (elementById) {
 				return elementById;
 			} else {
 				throw new Error('producto no encontrado');
 			}
 		} catch (error) {
-			console.log('hubo un error:', error);
+			throw { error: `${error.message}` };
+		}
+	}
+
+	async updateById(number, obj) {
+		try {
+			let element = this.productos.find((element) => element.id == number);
+			if (element) {
+				for (let i = 0; i < this.productos.length; i++) {
+					if (this.productos[i].id == number) {
+						this.productos[i].title = obj.title;
+						this.productos[i].price = obj.price;
+						this.productos[i].thumbnail = obj.thumbnail;
+						return this.productos[i];
+					}
+				}
+			} else {
+				throw new Error('producto no encontrado');
+			}
+		} catch (error) {
+			throw { error: `${error.message}` };
 		}
 	}
 
 	async getAll() {
-		try {
-			return this.productos;
-		} catch (error) {
-			console.log('hubo un error:', error);
-		}
+		return this.productos;
 	}
 
 	async deleteById(number) {
 		try {
-			this.productos = this.productos.filter(
-				(element) => element.id !== number
-			);
-			if (!this.productos) {
+			let element = this.productos.find((element) => element.id == number);
+			if (element) {
+				this.productos = this.productos.filter(
+					(element) => element.id != number
+				);
+			} else {
 				throw new Error('producto no encontrado');
 			}
 		} catch (error) {
-			console.log('hubo un error:', error);
+			throw { error: `${error.message}` };
 		}
 	}
 }
